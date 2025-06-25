@@ -83,27 +83,199 @@ class _GameScreenState extends State<GameScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text(won ? '🎉 You Won!' : '💀 Game Over'),
-        content: Text(won 
-          ? 'Congratulations! You guessed "$_currentWord"!'
-          : 'The word was "$_currentWord". Better luck next time!'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              _startNewGame();
-            },
-            child: const Text('Play Again'),
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: won 
+                ? [Colors.green[400]!, Colors.green[600]!]
+                : [Colors.red[400]!, Colors.red[600]!],
+            ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop(); // Return to menu
-            },
-            child: const Text('Menu'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header with large emoji
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      won ? '🏆' : '💀',
+                      style: const TextStyle(fontSize: 64),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      won ? 'VICTORY!' : 'GAME OVER',
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              
+              // Content
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            'The word was:',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _currentWord.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: Color(widget.level.gradientColors[1]),
+                              letterSpacing: 4,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            won 
+                              ? 'Amazing! You cracked the code!'
+                              : 'Don\'t give up! Try again!',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 24),
+                    
+                    // Action buttons
+                    Column(
+                      children: [
+                        _buildGameButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            _startNewGame();
+                          },
+                          text: 'PLAY AGAIN',
+                          icon: Icons.refresh,
+                          isPrimary: true,
+                          color: won ? Colors.green : Colors.red,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildGameButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pop(); // Return to menu
+                          },
+                          text: 'MENU',
+                          icon: Icons.home,
+                          isPrimary: false,
+                          color: won ? Colors.green : Colors.red,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGameButton({
+    required VoidCallback onPressed,
+    required String text,
+    required IconData icon,
+    required bool isPrimary,
+    required MaterialColor color,
+  }) {
+    return Material(
+      color: isPrimary ? Colors.white : Colors.transparent,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: isPrimary ? null : Border.all(color: Colors.white, width: 2),
+            boxShadow: isPrimary ? [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
+            ] : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: isPrimary ? color[600] : Colors.white,
+                size: 20,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                text,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isPrimary ? color[600] : Colors.white,
+                  letterSpacing: 1,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -113,118 +285,234 @@ class _GameScreenState extends State<GameScreen> {
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+          gradient: RadialGradient(
+            center: Alignment.topCenter,
+            radius: 1.5,
             colors: [
-              Color(widget.level.gradientColors[0]).withOpacity(0.3),
-              Color(widget.level.gradientColors[1]).withOpacity(0.1),
-              Colors.grey.shade100,
+              Color(widget.level.gradientColors[0]).withOpacity(0.8),
+              Color(widget.level.gradientColors[1]).withOpacity(0.6),
+              Colors.black.withOpacity(0.9),
             ],
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
-              // Header with level info
+              // Game Header with HUD-style design
               Container(
+                margin: const EdgeInsets.all(12),
                 padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.black.withOpacity(0.7),
+                      Colors.black.withOpacity(0.5),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Color(widget.level.gradientColors[0]).withOpacity(0.5),
+                    width: 2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Color(widget.level.gradientColors[0]).withOpacity(0.3),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
                 child: Row(
                   children: [
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white.withOpacity(0.2),
+                    // Back button with game styling
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(widget.level.gradientColors[0]).withOpacity(0.8),
+                            Color(widget.level.gradientColors[1]).withOpacity(0.6),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Text(
-                      widget.level.emoji,
-                      style: const TextStyle(fontSize: 24),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                    const SizedBox(width: 16),
+                    
+                    // Level info with game styling
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.white.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            widget.level.name,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
+                            widget.level.emoji,
+                            style: const TextStyle(fontSize: 24),
                           ),
-                          Text(
-                            widget.level.description,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black.withOpacity(0.7),
-                            ),
+                          const SizedBox(width: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                widget.level.name.toUpperCase(),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                              Text(
+                                'LEVEL ${widget.level.name.split(' ').last}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Color(widget.level.gradientColors[0]),
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ),
-                    IconButton(
-                      onPressed: _startNewGame,
-                      icon: const Icon(Icons.refresh),
-                      style: IconButton.styleFrom(
-                        backgroundColor: Colors.white.withOpacity(0.2),
+                    
+                    const Spacer(),
+                    
+                    // New game button with game styling
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.orange[400]!,
+                            Colors.orange[600]!,
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.orange.withOpacity(0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        onPressed: _startNewGame,
+                        icon: const Icon(Icons.refresh, color: Colors.white),
                       ),
                     ),
                   ],
                 ),
               ),
               
-              // Lives indicator - HOCKEY GAME
+              // Lives indicator - Hockey Game Style
               Container(
-                width: double.infinity,
-                margin: const EdgeInsets.all(16),
-                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.red[200]!, width: 2),
-                ),
-                child: Center(
-                  child: Text.rich(
-                    TextSpan(
-                      children: _livesText.split('').asMap().entries.map((entry) {
-                        int index = entry.key;
-                        String letter = entry.value;
-                        bool isStruck = index < _wrongGuesses;
-                        
-                        return TextSpan(
-                          text: letter,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: isStruck ? Colors.red[300] : Colors.red[700],
-                            decoration: isStruck ? TextDecoration.lineThrough : null,
-                            decorationColor: Colors.red[700],
-                            decorationThickness: 3,
-                          ),
-                        );
-                      }).toList(),
-                    ),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.red[900]!.withOpacity(0.8),
+                      Colors.red[700]!.withOpacity(0.6),
+                    ],
                   ),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.red[400]!, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.red.withOpacity(0.4),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      '⚡ ENERGY LEVEL ⚡',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red[200],
+                        letterSpacing: 2,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text.rich(
+                      TextSpan(
+                        children: _livesText.split('').asMap().entries.map((entry) {
+                          int index = entry.key;
+                          String letter = entry.value;
+                          bool isStruck = index < _wrongGuesses;
+                          
+                          return TextSpan(
+                            text: letter == ' ' ? '  ' : letter,
+                            style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: isStruck ? Colors.grey : Colors.white,
+                              decoration: isStruck ? TextDecoration.lineThrough : null,
+                              decorationColor: Colors.red[300],
+                              decorationThickness: 4,
+                              shadows: isStruck ? null : [
+                                Shadow(
+                                  color: Colors.red[400]!,
+                                  blurRadius: 8,
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               
-              // Word display
+              // Word display - Game style
               Container(
                 width: double.infinity,
                 margin: const EdgeInsets.symmetric(horizontal: 16),
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.black.withOpacity(0.8),
+                      Colors.black.withOpacity(0.6),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Color(widget.level.gradientColors[0]).withOpacity(0.6),
+                    width: 3,
+                  ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: Color(widget.level.gradientColors[0]).withOpacity(0.4),
+                      blurRadius: 20,
+                      spreadRadius: 3,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
@@ -258,12 +546,37 @@ class _GameScreenState extends State<GameScreen> {
                               width: letterWidth,
                               height: letterWidth * 1.2, // Maintain aspect ratio
                               decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: Color(widget.level.gradientColors[1]),
-                                    width: 3,
-                                  ),
+                                gradient: LinearGradient(
+                                  colors: isRevealed 
+                                    ? [
+                                        Color(widget.level.gradientColors[0]).withOpacity(0.3),
+                                        Color(widget.level.gradientColors[1]).withOpacity(0.2),
+                                      ]
+                                    : [
+                                        Colors.grey[800]!.withOpacity(0.5),
+                                        Colors.grey[900]!.withOpacity(0.3),
+                                      ],
                                 ),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: isRevealed 
+                                    ? Color(widget.level.gradientColors[0])
+                                    : Colors.grey[600]!,
+                                  width: 2,
+                                ),
+                                boxShadow: isRevealed ? [
+                                  BoxShadow(
+                                    color: Color(widget.level.gradientColors[0]).withOpacity(0.3),
+                                    blurRadius: 8,
+                                    spreadRadius: 1,
+                                  ),
+                                ] : [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                               ),
                               child: Center(
                                 child: FittedBox(
@@ -273,7 +586,15 @@ class _GameScreenState extends State<GameScreen> {
                                     style: TextStyle(
                                       fontSize: fontSize,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(widget.level.gradientColors[1]),
+                                      color: isRevealed 
+                                        ? Colors.white
+                                        : Colors.transparent,
+                                      shadows: isRevealed ? [
+                                        Shadow(
+                                          color: Color(widget.level.gradientColors[1]),
+                                          blurRadius: 4,
+                                        ),
+                                      ] : null,
                                     ),
                                   ),
                                 ),
@@ -289,34 +610,76 @@ class _GameScreenState extends State<GameScreen> {
               
               const SizedBox(height: 20),
               
-              // Wrong letters display
+              // Wrong letters display - Game style
               if (_wrongLetters.isNotEmpty)
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 16),
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.red[50],
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red[200]!),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.red[900]!.withOpacity(0.7),
+                        Colors.red[800]!.withOpacity(0.5),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.red[400]!, width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.red.withOpacity(0.3),
+                        blurRadius: 12,
+                        spreadRadius: 1,
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
-                      Text(
-                        'Wrong Guesses (${_wrongLetters.length}):',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.red[700],
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.warning,
+                            color: Colors.red[200],
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'MISSED SHOTS: ${_wrongLetters.length}',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red[200],
+                              letterSpacing: 1,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.warning,
+                            color: Colors.red[200],
+                            size: 20,
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _wrongLetters.toList().join(', '),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red[600],
-                        ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: _wrongLetters.map((letter) => Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.red[700],
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: Colors.red[300]!),
+                          ),
+                          child: Text(
+                            letter,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        )).toList(),
                       ),
                     ],
                   ),
@@ -324,20 +687,32 @@ class _GameScreenState extends State<GameScreen> {
               
               const Spacer(),
               
-              // Keyboard
+              // Game Keyboard
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withOpacity(0.9),
+                      Colors.black.withOpacity(0.7),
+                    ],
+                  ),
                   borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
+                    topLeft: Radius.circular(25),
+                    topRight: Radius.circular(25),
+                  ),
+                  border: Border.all(
+                    color: Color(widget.level.gradientColors[0]).withOpacity(0.4),
+                    width: 2,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, -2),
+                      color: Color(widget.level.gradientColors[0]).withOpacity(0.3),
+                      blurRadius: 20,
+                      spreadRadius: 2,
+                      offset: const Offset(0, -5),
                     ),
                   ],
                 ),
@@ -399,22 +774,47 @@ class _GameScreenState extends State<GameScreen> {
     bool hasWrongGuesses = _wrongLetters.contains(key);
     bool isCorrect = isGuessed && _currentWord.contains(key);
     
-    Color keyColor;
+    List<Color> gradientColors;
     Color textColor;
     Color borderColor;
+    List<BoxShadow> shadows;
     
     if (isCorrect) {
-      keyColor = Colors.green[50]!;
-      textColor = Colors.green[700]!;
+      gradientColors = [Colors.green[400]!, Colors.green[600]!];
+      textColor = Colors.white;
       borderColor = Colors.green[300]!;
+      shadows = [
+        BoxShadow(
+          color: Colors.green.withOpacity(0.4),
+          blurRadius: 8,
+          spreadRadius: 1,
+        ),
+      ];
     } else if (hasWrongGuesses) {
-      keyColor = Colors.red[50]!;
-      textColor = Colors.red[700]!;
+      gradientColors = [Colors.red[400]!, Colors.red[600]!];
+      textColor = Colors.white;
       borderColor = Colors.red[300]!;
+      shadows = [
+        BoxShadow(
+          color: Colors.red.withOpacity(0.4),
+          blurRadius: 8,
+          spreadRadius: 1,
+        ),
+      ];
     } else {
-      keyColor = Color(widget.level.gradientColors[0]).withOpacity(0.1);
-      textColor = Color(widget.level.gradientColors[1]);
-      borderColor = Color(widget.level.gradientColors[0]).withOpacity(0.3);
+      gradientColors = [
+        Color(widget.level.gradientColors[0]).withOpacity(0.8),
+        Color(widget.level.gradientColors[1]).withOpacity(0.6),
+      ];
+      textColor = Colors.white;
+      borderColor = Color(widget.level.gradientColors[0]).withOpacity(0.6);
+      shadows = [
+        BoxShadow(
+          color: Color(widget.level.gradientColors[0]).withOpacity(0.3),
+          blurRadius: 6,
+          offset: const Offset(0, 3),
+        ),
+      ];
     }
     
     // Calculate responsive font size based on key width
@@ -423,33 +823,38 @@ class _GameScreenState extends State<GameScreen> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 2),
       child: Material(
-        color: keyColor,
-        borderRadius: BorderRadius.circular(8),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
         child: InkWell(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           onTap: () => _onKeyPressed(key),
           child: Container(
             width: keyWidth,
             height: keyHeight,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: borderColor, width: 1),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: borderColor, width: 2),
               gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.white,
-                  keyColor,
-                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: gradientColors,
               ),
+              boxShadow: shadows,
             ),
             child: Center(
               child: Text(
                 key,
                 style: TextStyle(
                   fontSize: fontSize,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.bold,
                   color: textColor,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 2,
+                      offset: const Offset(1, 1),
+                    ),
+                  ],
                 ),
               ),
             ),
